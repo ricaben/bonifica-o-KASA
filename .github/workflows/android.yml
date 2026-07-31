@@ -1,3 +1,4 @@
+
 name: Gerar APK Kasa Gestao
 
 on:
@@ -22,6 +23,30 @@ jobs:
           unzip -o Bonus_Kasa_Esfihas_Projeto_Android_Automatizado.zip
           ls -la
           find . -maxdepth 3 -name settings.gradle -print
+
+      - name: Corrigir confirmacoes do Android
+        run: |
+          python3 - <<'PY'
+          path = "BonusKasaEsfihasAndroid/app/src/main/java/com/kasaesfihas/bonus/MainActivity.java"
+
+          with open(path, "r", encoding="utf-8") as f:
+              text = f.read()
+
+          if "import android.webkit.WebChromeClient;" not in text:
+              text = text.replace(
+                  "import android.webkit.WebViewClient;",
+                  "import android.webkit.WebViewClient;\nimport android.webkit.WebChromeClient;"
+              )
+
+          if "setWebChromeClient" not in text:
+              text = text.replace(
+                  "webView.setWebViewClient(new WebViewClient());",
+                  "webView.setWebViewClient(new WebViewClient());\n        webView.setWebChromeClient(new WebChromeClient());"
+              )
+
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(text)
+          PY
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
